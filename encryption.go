@@ -88,11 +88,15 @@ func Decrypt(password string, nonceSize int, ciphertext []byte) ([]byte, error) 
 const PasswordSaltLength int = 8
 
 // returns password hash  and salt, in that order
-func HashPassword(password string, saltPtr *[]byte) ([]byte, []byte) {
+func HashPassword(password string, saltPtr *[]byte) ([]byte, []byte, error) {
 	var salt []byte
 	if saltPtr == nil {
 		salt = make([]byte, PasswordSaltLength)
-		rand.Read(salt)
+		_, err := rand.Read(salt)
+		if err != nil {
+			return nil, nil, err
+		}
+
 	} else {
 		salt = *saltPtr
 	}
@@ -101,13 +105,16 @@ func HashPassword(password string, saltPtr *[]byte) ([]byte, []byte) {
 	// https://godoc.org/golang.org/x/crypto/argon2#Key
 	hash := argon2.Key([]byte(password), salt, 1, 64*1024, 1, 32)
 
-	return hash, salt
+	return hash, salt, nil
 }
 
 func ValidatePassword(password string, saltedPasswordHash []byte) (bool, error) {
 	salt := saltedPasswordHash[0:PasswordSaltLength]
 	passwordHash := saltedPasswordHash[PasswordSaltLength:]
-	newPasswordHash, _ := HashPassword(password, &salt)
+	newPasswordHash, _, err := HashPassword(password, &salt)
+	if err != nil {
+		return false, err
+	}
 
 	return bytes.Compare(newPasswordHash, passwordHash) == 0, nil
 }

@@ -88,7 +88,11 @@ func SaveLogins(logins []*Login, passPhrase string) error {
 	}
 
 	encodedData := base64.StdEncoding.EncodeToString(encryptedData)
-	hash, salt := HashPassword(passPhrase, nil)
+	hash, salt, err := HashPassword(passPhrase, nil)
+	if err != nil {
+		return err
+	}
+
 	passPhraseHash := append(salt, hash...)
 
 	store := &Store{
