@@ -27,7 +27,7 @@ any rate.
 
 If there are any mistakes or encryption mishaps going on in the code, please do
 share them with me as I would be interested to learn more and improve the
-security of the program in the process.
+encryption implementation in the process.
 
 ## Installation and usage
 The easiest way to get this software going is on a desktop computer with golang
