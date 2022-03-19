@@ -20,7 +20,7 @@ I am by no means a security expert and have written this untested, kind of messy
 piece of software in just one day. I have superficial knowledge of encryption,
 so the encryption implementation is very barebones and may not be on the
 forefront of encryption best practices. This being said having the file be
-encrypted is better than having it be not at all encrypted. The software being
+encrypted is better than having it not be encrypted at all. The software being
 fairly non-standard and running on a non-standard operating system combined with
 the encryption make for a reasonably secure way to store passwords in my case at
 any rate.
@@ -40,15 +40,16 @@ and firefox installed on it:
    "Export logins". Save the file as ~/Downloads/logins.csv.
 4. In your terminal, type `./ff-pwd import` to import the passwords and go
    through the initial setup steps.
-5. Now compile ff-pwd for arm64 using `GOARCH=arm64 go build .`
-6. Move the ff-pwd file over to your ubports device. I use `scp ./ff-pwd
+5. Now don't forget to delete the unencrypted logins.csv file `rm -f ~/Downloads/logins.csv`
+6. Now compile ff-pwd for arm64 using `GOARCH=arm64 go build .`
+7. Move the ff-pwd file over to your ubports device. I use `scp ./ff-pwd
    phablet@[phablet-ip]:/home/phablet/bin/ff-pwd` for this because I have ssh
    enabled on my device.
-7. Now move the data file ~/.config/ff-pwd/data.json over to the same location
+8. Now move the data file ~/.config/ff-pwd/data.json over to the same location
    on the ubports device. `ssh phablet@[phablet-ip] mkdir -p
    /home/phablet/.config/ff-pwd; scp ~/.config/ff-pwd/data.json
    phablet@[phablet-ip]:/home/phablet/.config/ff-pwd/data.json`.
-8. To search for passwords on your device you can now run `ff-pwd find` from the
+9. To search for passwords on your device you can now run `ff-pwd find` from the
    terminal app.
 
 It isn't optimal, to keep the password database on your phone up to date you'll
@@ -56,3 +57,11 @@ need to import it every once in a while and sync it over to your phone. It might
 be worth it to create a nextcloud sync folder on your device to make the process
 of sending the file over a bit more streamlined. There is currently no way to
 automate the firefox password export.
+
+
+## Future Dreams
+Ideally there would be a way to use the FF sync API directly or have a native
+click GUI app with the same functionality or even a way to run full fledged
+firefox on a ubports phone. None of these things are currently straightforward
+for me to implement within a reasonable amount of time though, so I settled for
+this solution.
