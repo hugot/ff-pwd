@@ -52,7 +52,7 @@ func importCSV(fileName string) error {
 		}
 	}
 
-	fmt.Print("Encryption Passphrase:")
+	fmt.Fprint(os.Stderr, "Encryption Passphrase:")
 	passPhrase, err := term.ReadPassword(int(os.Stdin.Fd()))
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func importCSV(fileName string) error {
 	fmt.Print("\n")
 
 	if store == nil {
-		fmt.Print("Encryption Passphrase repeat:")
+		fmt.Fprint(os.Stderr, "Encryption Passphrase repeat:")
 		repeatPassPhrase, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
 			return err
@@ -94,12 +94,12 @@ func findPassword() (string, error) {
 		return "", err
 	}
 
-	fmt.Print("Decryption Passphrase:")
+	fmt.Fprint(os.Stderr, "Decryption Passphrase:")
 	passPhrase, err := term.ReadPassword(int(os.Stdin.Fd()))
 	if err != nil {
 		return "", err
 	}
-	fmt.Print("\n")
+	fmt.Fprint(os.Stderr, "\n")
 
 	valid, err := store.ValidatePassphrase(string(passPhrase))
 	if err != nil {
@@ -143,7 +143,12 @@ func main() {
 		"The CSV file containing passwords, as exported from firefox.",
 	)
 
-	switch os.Args[1] {
+	subcommand := "help"
+	if len(os.Args) > 1 {
+		subcommand = os.Args[1]
+	}
+
+	switch subcommand {
 	case "import":
 		importCmd.Parse(os.Args[2:])
 		err := importCSV(*importFile)
@@ -156,63 +161,18 @@ func main() {
 			log.Fatal(err)
 		}
 
+		// use stderr to surround the password with some newlines in the console
+		// without dirtying up stdout. This way the password is easier to select
+		// in a terminal, but can still be used from standard output for
+		// scripting purposes.
+		fmt.Fprint(os.Stderr, "\n")
 		fmt.Println(pass)
+		fmt.Fprint(os.Stderr, "\n")
 	default:
 		fmt.Fprint(os.Stderr, "Expected subcommand \"import\" or \"find\".")
+		fmt.Fprint(os.Stderr, "\n\nSUPPORTED SUBCOMMANDS\n\nimport: Import logins.csv from firefox.\n")
+		importCmd.Usage()
+		fmt.Fprint(os.Stderr, "find: Find a password string and print it to stdout.\n")
 		os.Exit(1)
 	}
-
-	// idx, err := fuzzyfinder.FindMulti(
-	// 	logins,
-	// 	func(i int) string {
-	// 		return logins[i].URL
-	// 	},
-	// 	fuzzyfinder.WithPreviewWindow(func(i, w, h int) string {
-	// 		if i == -1 {
-	// 			return ""
-	// 		}
-
-	// 		return logins[i].Format()
-	// 	}))
-
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// fmt.Println(logins[idx[0]].Password)
 }
-
-// type Track struct {
-// 	Name      string
-// 	AlbumName string
-// 	Artist    string
-// }
-
-// var tracks = []Track{
-// 	{"foo", "album1", "artist1"},
-// 	{"bar", "album1", "artist1"},
-// 	{"foo", "album2", "artist1"},
-// 	{"baz", "album2", "artist2"},
-// 	{"baz", "album3", "artist2"},
-// }
-
-// func main() {
-// 	idx, err := fuzzyfinder.FindMulti(
-// 		tracks,
-// 		func(i int) string {
-// 			return tracks[i].Name
-// 		},
-// 		fuzzyfinder.WithPreviewWindow(func(i, w, h int) string {
-// 			if i == -1 {
-// 				return ""
-// 			}
-// 			return fmt.Sprintf("Track: %s (%s)\nAlbum: %s",
-// 				tracks[i].Name,
-// 				tracks[i].Artist,
-// 				tracks[i].AlbumName)
-// 		}))
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	fmt.Printf("selected: %v\n", idx)
-//}
