@@ -7,7 +7,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
+	"errors"
 	"io"
 
 	"golang.org/x/crypto/argon2"
@@ -68,16 +68,18 @@ func Decrypt(password string, nonceSize int, ciphertext []byte) ([]byte, error) 
 
 	c, err := aes.NewCipher(key[:])
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	gcm, err := cipher.NewGCM(c)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	if len(ciphertext) < nonceSize {
-		fmt.Println(err)
+		return nil, errors.New(
+			"Something fishy is going on, the ciphertext is shorter than the nonce alone is supposed to be.",
+		)
 	}
 
 	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
